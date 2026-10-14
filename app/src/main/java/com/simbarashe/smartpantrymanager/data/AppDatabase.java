@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-/** The single Room database for the app (SQLite file stored on the device). */
+/** The single Room database for the app (a SQLite file stored on the device). */
 @Database(
         entities = {PantryItem.class, Recipe.class, RecipeIngredient.class},
         version = 1,
@@ -26,8 +26,9 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "smart_pantry.db")
-                    .allowMainThreadQueries()   // fine for this small student app
+                    .allowMainThreadQueries()   // acceptable for a small student app
                     .build();
+            RecipeSeeder.seedIfEmpty(instance);   // load recipes on first run only
         }
         return instance;
     }

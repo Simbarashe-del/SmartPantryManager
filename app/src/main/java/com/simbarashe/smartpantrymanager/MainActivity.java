@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
     public boolean onOptionsItemSelected(MenuItem item) {
         // Placeholders for now; we connect these to real screens in the next steps.
         if (item.getItemId() == R.id.action_suggested) {
-            Toast.makeText(this, "Suggested Recipes coming next", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, SuggestedRecipesActivity.class));
             return true;
         } else if (item.getItemId() == R.id.action_settings) {
             Toast.makeText(this, "Settings coming next", Toast.LENGTH_SHORT).show();
