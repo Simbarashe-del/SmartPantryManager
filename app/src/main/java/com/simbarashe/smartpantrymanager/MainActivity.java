@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
             startActivity(new Intent(this, SuggestedRecipesActivity.class));
             return true;
         } else if (item.getItemId() == R.id.action_settings) {
-            Toast.makeText(this, "Settings coming next", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

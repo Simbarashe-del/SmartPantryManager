@@ -1,5 +1,7 @@
 package com.simbarashe.smartpantrymanager;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.simbarashe.smartpantrymanager.data.PantryItem;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /** Custom adapter that turns PantryItem objects into rows for the RecyclerView. */
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
@@ -50,11 +57,23 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         PantryItem item = items.get(position);
         holder.textName.setText(item.name);
         holder.textQuantity.setText(formatQuantity(item.quantity) + " " + item.unit);
+
+        // Read the user's setting from SharedPreferences
+        boolean alertsOn = holder.itemView.getContext()
+                .getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(SettingsActivity.KEY_EXPIRY_ALERTS, true);
+
         if (item.expiryDate == null || item.expiryDate.isEmpty()) {
             holder.textExpiry.setText("No expiry date");
+            holder.textExpiry.setTextColor(Color.GRAY);
+        } else if (alertsOn && isExpiringSoon(item.expiryDate)) {
+            holder.textExpiry.setText("Expiring soon! " + item.expiryDate);
+            holder.textExpiry.setTextColor(Color.RED);
         } else {
             holder.textExpiry.setText("Expires: " + item.expiryDate);
+            holder.textExpiry.setTextColor(Color.GRAY);
         }
+
         holder.itemView.setOnClickListener(v -> listener.onEdit(item));
         holder.buttonDelete.setOnClickListener(v -> listener.onDelete(item));
     }
@@ -62,6 +81,25 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    /** True if the date is today, in the past, or within the next 3 days. */
+    private boolean isExpiringSoon(String dateText) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date expiry = format.parse(dateText);
+
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            long days = (expiry.getTime() - today.getTimeInMillis()) / (24L * 60 * 60 * 1000);
+            return days <= 3;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 
     private String formatQuantity(double q) {
